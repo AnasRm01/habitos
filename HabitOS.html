@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HabitOS — Turn Your Life Into a Game</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+
+/* ══════════════════════════════════════════════
+   SHARED
+══════════════════════════════════════════════ */
+:root {
+  --bg:#0a0a0f; --surface:#111118; --surface2:#18181f; --surface3:#1e1e28;
+  --border:rgba(255,255,255,0.06); --border2:rgba(255,255,255,0.11);
+  --text:#f0f0f5; --text2:#8888a0; --text3:#55556a;
+  --accent:#6ee7b7; --accent2:#818cf8; --accent3:#f472b6;
+  --gold:#fbbf24; --red:#f87171; --green:#34d399;
+  --mono:'DM Mono',monospace; --display:'Syne',sans-serif; --body:'DM Sans',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px}
+body{font-family:var(--body);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 80% 50% at 15% -10%,rgba(110,231,183,0.05) 0%,transparent 55%),
+    radial-gradient(ellipse 60% 40% at 85% 110%,rgba(129,140,248,0.05) 0%,transparent 55%);
+}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:3px}
+
+/* SCREENS */
+#screen-landing{display:block}
+#screen-app{display:none}
+
+/* transition */
+.screen-fade{animation:fadeIn .35s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ══════════════════════════════════════════════
+   LANDING PAGE
+══════════════════════════════════════════════ */
+.lnav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:16px 40px;display:flex;align-items:center;justify-content:space-between;
+  background:rgba(10,10,15,0.88);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+}
+.lnav-logo{
+  font-family:var(--display);font-size:1.3rem;font-weight:800;
+  background:linear-gradient(130deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.lbtn{
+  padding:9px 20px;border-radius:8px;font-size:0.85rem;font-weight:600;
+  cursor:pointer;border:1px solid transparent;font-family:var(--body);
+  transition:all .15s;display:inline-flex;align-items:center;gap:6px;
+  text-decoration:none;background:none;
+}
+.lbtn-ghost{border-color:rgba(255,255,255,0.12);color:var(--text2)}
+.lbtn-ghost:hover{background:rgba(255,255,255,0.05);color:var(--text)}
+.lbtn-primary{background:var(--accent);color:#050a07;border-color:var(--accent)}
+.lbtn-primary:hover{background:#4dd4a0;transform:translateY(-1px);box-shadow:0 8px 25px rgba(110,231,183,0.25)}
+.lbtn-big{padding:14px 32px;font-size:1rem;border-radius:10px}
+
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;
+  padding:130px 24px 80px;position:relative;z-index:1;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:7px;
+  background:rgba(110,231,183,0.08);border:1px solid rgba(110,231,183,0.2);
+  padding:6px 16px;border-radius:999px;
+  font-family:var(--mono);font-size:0.7rem;color:var(--accent);
+  margin-bottom:28px;letter-spacing:1px;
+}
+.hero-title{
+  font-family:var(--display);font-size:clamp(3rem,8vw,6rem);
+  font-weight:800;line-height:1.02;margin-bottom:22px;letter-spacing:-2.5px;
+}
+.hero-title .hl{
+  background:linear-gradient(130deg,var(--accent) 0%,var(--accent2) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-sub{font-size:clamp(1rem,2vw,1.15rem);color:var(--text2);max-width:500px;line-height:1.75;margin-bottom:40px}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:24px}
+.hero-note{font-family:var(--mono);font-size:0.68rem;color:var(--text3);display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center}
+.hero-note .ok{color:var(--green)}
+
+/* App preview mockup */
+.mockup{
+  max-width:860px;width:100%;margin-top:56px;
+  background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;
+  box-shadow:0 40px 120px rgba(0,0,0,0.65),0 0 0 1px rgba(255,255,255,0.04);
+}
+.mock-bar{background:#16161e;padding:12px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)}
+.mdot{width:12px;height:12px;border-radius:50%}
+.mock-title{flex:1;text-align:center;font-family:var(--mono);font-size:0.62rem;color:#444}
+.mock-body{padding:20px}
+.mock-kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.mk{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center}
+.mk-v{font-family:var(--mono);font-size:1.3rem;font-weight:500}
+.mk-l{font-size:0.6rem;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:.5px}
+.mock-row{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:10px 14px;margin-bottom:5px;display:flex;align-items:center;gap:9px}
+.mr-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.mr-name{flex:1;font-size:0.8rem}
+.mr-boxes{display:flex;gap:3px}
+.mrb{width:20px;height:20px;border-radius:4px;border:1.5px solid;display:flex;align-items:center;justify-content:center;font-size:0.6rem}
+.mrb.y{background:rgba(52,211,153,.1);border-color:#34d399;color:#34d399}
+.mrb.n{background:#0f0f18;border-color:#2a2a38}
+.mr-pct{font-family:var(--mono);font-size:0.7rem;color:var(--accent);min-width:32px;text-align:right}
+
+/* Features */
+.features{padding:90px 24px;position:relative;z-index:1}
+.sec-tag{font-family:var(--mono);font-size:0.62rem;color:var(--accent);text-transform:uppercase;letter-spacing:3px;text-align:center;margin-bottom:12px}
+.sec-title{font-family:var(--display);font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;text-align:center;margin-bottom:12px;letter-spacing:-1px}
+.sec-sub{text-align:center;color:var(--text2);max-width:440px;margin:0 auto 50px;line-height:1.75}
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;max-width:980px;margin:0 auto}
+.feat{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:22px;transition:all .2s}
+.feat:hover{border-color:rgba(110,231,183,0.18);transform:translateY(-2px)}
+.feat-ico{font-size:1.6rem;margin-bottom:12px}
+.feat-name{font-family:var(--display);font-size:0.95rem;font-weight:700;margin-bottom:7px}
+.feat-desc{font-size:0.8rem;color:var(--text2);line-height:1.65}
+
+/* Steps */
+.howto{padding:70px 24px;position:relative;z-index:1}
+.steps{display:flex;flex-direction:column;gap:12px;max-width:540px;margin:0 auto}
+.step{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:18px;display:flex;align-items:flex-start;gap:14px}
+.step-n{width:34px;height:34px;border-radius:7px;background:rgba(110,231,183,.1);border:1px solid rgba(110,231,183,.2);color:var(--accent);font-family:var(--mono);font-size:0.88rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.step-title{font-family:var(--display);font-weight:700;margin-bottom:4px;font-size:0.9rem}
+.step-desc{font-size:0.79rem;color:var(--text2);line-height:1.6}
+
+/* CTA */
+.cta{padding:90px 24px;text-align:center;position:relative;z-index:1}
+.cta-box{max-width:580px;margin:0 auto;background:linear-gradient(135deg,rgba(110,231,183,.05),rgba(129,140,248,.05));border:1px solid rgba(110,231,183,.14);border-radius:20px;padding:56px 36px}
+.cta-title{font-family:var(--display);font-size:clamp(1.8rem,4vw,2.4rem);font-weight:800;margin-bottom:14px;letter-spacing:-1px}
+.cta-sub{color:var(--text2);margin-bottom:30px;line-height:1.75}
+
+/* Footer */
+.lfooter{border-top:1px solid var(--border);padding:22px 40px;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;flex-wrap:wrap;gap:10px}
+.lfooter-logo{font-family:var(--display);font-weight:800;color:var(--text3)}
+.lfooter-note{font-family:var(--mono);font-size:0.62rem;color:var(--text3)}
+
+
+/* ══════════════════════════════════════════════
+   APP
+══════════════════════════════════════════════ */
+.layout{display:flex;height:100vh;position:relative;z-index:1}
+
+/* Sidebar */
+.sidebar{width:230px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:100}
+.logo-area{padding:22px 20px 18px;border-bottom:1px solid var(--border)}
+.logo-word{font-family:var(--display);font-size:1.35rem;font-weight:800;background:linear-gradient(130deg,var(--accent) 0%,var(--accent2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-.5px}
+.logo-tag{font-family:var(--mono);font-size:0.6rem;color:var(--text3);letter-spacing:2.5px;text-transform:uppercase;margin-top:3px}
+.nav-section{padding:14px 10px;flex:1}
+.nav-label{font-family:var(--mono);font-size:0.55rem;color:var(--text3);text-transform:uppercase;letter-spacing:2px;padding:0 10px;margin-bottom:6px}
+.nav-btn{display:flex;align-items:center;gap:9px;width:100%;padding:9px 12px;border-radius:8px;border:1px solid transparent;background:none;color:var(--text2);font-size:0.82rem;font-weight:500;cursor:pointer;transition:all .15s;text-align:left;font-family:var(--body);margin-bottom:2px}
+.nav-btn .n-icon{font-size:0.95rem;width:18px;text-align:center}
+.nav-btn:hover{background:var(--surface2);color:var(--text)}
+.nav-btn.active{background:rgba(110,231,183,.07);color:var(--accent);border-color:rgba(110,231,183,.12)}
+.sidebar-bottom{padding:14px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:4px}
+.sb-btn{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;border:1px solid var(--border);background:none;color:var(--text3);font-size:0.75rem;cursor:pointer;transition:all .15s;font-family:var(--body);width:100%;text-align:left}
+.sb-btn:hover{color:var(--text2);background:var(--surface2);border-color:var(--border2)}
+
+/* Main area */
+.main-area{margin-left:230px;flex:1;display:flex;flex-direction:column;min-height:100vh;overflow-y:auto}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(10,10,15,.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:14px 26px;display:flex;align-items:center;justify-content:space-between}
+.page-name{font-family:var(--display);font-size:1.05rem;font-weight:700}
+.page-sub{font-family:var(--mono);font-size:0.68rem;color:var(--text3);margin-left:10px}
+.topbar-actions{display:flex;gap:8px}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:7px;cursor:pointer;font-size:0.77rem;font-weight:600;font-family:var(--body);transition:all .15s;border:1px solid transparent}
+.btn-ghost{background:none;border-color:var(--border2);color:var(--text2)}
+.btn-ghost:hover{background:var(--surface2);color:var(--text)}
+.btn-accent{background:var(--accent);color:#050a07}
+.btn-accent:hover{background:#4dd4a0}
+.btn-outline{background:none;border-color:rgba(110,231,183,.25);color:var(--accent)}
+.btn-outline:hover{background:rgba(110,231,183,.07)}
+.btn-danger{background:none;border-color:rgba(248,113,113,.3);color:var(--red)}
+.btn-danger:hover{background:rgba(248,113,113,.08)}
+.content{padding:24px 26px;flex:1}
+
+/* Views */
+.view{display:none}.view.active{display:block}
+
+/* Tracker */
+.tracker-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px}
+.month-title{font-family:var(--display);font-size:2.2rem;font-weight:800;line-height:1}
+.month-title .yr{color:var(--text3);font-weight:400}
+.week-nav{display:flex;align-items:center;gap:6px}
+.wk-arrow{width:28px;height:28px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);color:var(--text2);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all .13s}
+.wk-arrow:hover{background:var(--surface3);color:var(--text);border-color:var(--border2)}
+.wk-label{font-family:var(--mono);font-size:0.68rem;color:var(--text2);background:var(--surface2);border:1px solid var(--border);padding:5px 11px;border-radius:6px;min-width:155px;text-align:center}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:13px 15px;display:flex;align-items:center;gap:11px}
+.kpi-ico{font-size:1.15rem}
+.kpi-v{font-family:var(--mono);font-size:1.25rem;font-weight:500;line-height:1.1}
+.kpi-l{font-size:0.66rem;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-top:1px}
+.c-green{color:var(--green)}.c-purple{color:var(--accent2)}.c-gold{color:var(--gold)}.c-pink{color:var(--accent3)}
+
+/* Table */
+.tcard{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.htable{width:100%;border-collapse:collapse}
+.htable thead th{padding:9px 5px;text-align:center;font-family:var(--mono);font-size:0.6rem;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:1px;background:var(--surface2);border-bottom:1px solid var(--border);white-space:nowrap}
+.htable thead th.h-col{text-align:left;padding-left:18px;min-width:180px;letter-spacing:1.5px;font-family:var(--display)}
+.htable thead th.td-col{color:var(--accent);background:rgba(110,231,183,.04)}
+.htable thead th.wk-col{color:var(--accent2)}
+.dn{display:block;font-family:var(--display);font-size:0.95rem;font-weight:600;color:var(--text2);margin-top:1px}
+.dn.today{color:var(--accent)}
+.htable tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+.htable tbody tr:last-child{border-bottom:none}
+.htable tbody tr:hover{background:rgba(255,255,255,.012)}
+.htable td{padding:7px 5px;text-align:center}
+.htable td.hcell{text-align:left;padding-left:18px;padding-right:10px}
+.hlabel{display:flex;align-items:center;gap:9px}
+.hdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.hemo{font-size:.88rem}
+.hname{font-size:.8rem;font-weight:500;white-space:nowrap}
+.cb{width:28px;height:28px;border-radius:6px;border:1.5px solid var(--surface3);background:var(--surface2);cursor:pointer;transition:all .13s;display:inline-flex;align-items:center;justify-content:center;position:relative}
+.cb::after{content:''}
+.cb:not(.cb-fut):hover{border-color:var(--accent);background:rgba(110,231,183,.06)}
+.cb.cb-done{background:rgba(52,211,153,.1);border-color:var(--green)}
+.cb.cb-done::after{content:'✓';font-size:.8rem;font-weight:700;color:var(--green)}
+.cb.cb-fut{cursor:default;border-color:var(--border);background:var(--bg);opacity:.25}
+td.td-col{background:rgba(110,231,183,.018)}
+td.wk-col{background:rgba(129,140,248,.018)}
+.pct-cell{min-width:85px;padding:7px 14px 7px 5px !important;text-align:right !important}
+.pct-n{font-family:var(--mono);font-size:.7rem;font-weight:500}
+.pct-bg{height:3px;background:var(--surface3);border-radius:2px;margin-top:4px}
+.pct-fill{height:3px;border-radius:2px;transition:width .4s}
+.htable tfoot tr{border-top:2px solid var(--border2)}
+.htable tfoot td{padding:7px 5px;text-align:center;font-family:var(--mono);font-size:.67rem}
+.htable tfoot .fl{text-align:left;padding-left:18px;font-size:.6rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+.fp{color:var(--accent);font-weight:500}.fdc{color:var(--text2)}.fnd{color:var(--text3)}
+.minichart{display:flex;gap:3px;align-items:flex-end;height:50px;padding:8px 18px 6px;border-top:1px solid var(--border);background:var(--surface2)}
+.mbar{flex:1;border-radius:3px 3px 0 0;transition:height .4s;min-height:2px}
+
+/* Habits */
+.add-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:18px}
+.add-card-title{font-family:var(--mono);font-size:.6rem;color:var(--text3);text-transform:uppercase;letter-spacing:2.5px;margin-bottom:14px}
+.form-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+.fg{display:flex;flex-direction:column;gap:4px}
+.fl2{font-family:var(--mono);font-size:.58rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+.inp{padding:8px 11px;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:.8rem;outline:none;font-family:var(--body);transition:border-color .15s}
+.inp:focus{border-color:var(--accent)}
+.inp-n{min-width:230px}.inp-e{width:62px;text-align:center;font-size:1rem}
+.swatches{display:flex;gap:5px}
+.sw{width:22px;height:22px;border-radius:5px;cursor:pointer;border:2px solid transparent;transition:all .13s}
+.sw.sel{border-color:white;transform:scale(1.15)}
+.h-list{display:flex;flex-direction:column;gap:6px}
+.hrow{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:11px 15px;display:flex;align-items:center;gap:10px;transition:all .13s}
+.hrow:hover{border-color:var(--border2);background:var(--surface2)}
+.hrow-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.hrow-emo{font-size:1rem;width:22px;text-align:center}
+.hrow-n{flex:1;font-size:.82rem;font-weight:500}
+.hrow-dt{font-family:var(--mono);font-size:.62rem;color:var(--text3)}
+
+/* Stats */
+.bigs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.big-stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;text-align:center}
+.big-v{font-family:var(--display);font-size:2.4rem;font-weight:800;line-height:1}
+.big-l{font-family:var(--mono);font-size:.57rem;color:var(--text3);margin-top:6px;text-transform:uppercase;letter-spacing:1.5px}
+.chart-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px}
+.cbox-t{font-family:var(--display);font-size:.8rem;font-weight:700;color:var(--text2);margin-bottom:14px;text-transform:uppercase;letter-spacing:1px}
+.bars{display:flex;gap:5px;align-items:flex-end;height:80px}
+.bcol{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.bbg{width:100%;background:var(--surface2);border-radius:3px;flex:1;display:flex;align-items:flex-end;border:1px solid var(--border);overflow:hidden}
+.bfill{width:100%;border-radius:2px;transition:height .5s cubic-bezier(.34,1.56,.64,1)}
+.blabel{font-family:var(--mono);font-size:.57rem;color:var(--text3)}
+.bval{font-family:var(--mono);font-size:.53rem;color:var(--accent);font-weight:500}
+.hsl{display:flex;flex-direction:column;gap:7px}
+.hs{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:13px 16px;transition:border-color .13s}
+.hs:hover{border-color:var(--border2)}
+.hs-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.hs-name{display:flex;align-items:center;gap:8px;font-size:.82rem;font-weight:500}
+.hs-right{display:flex;gap:12px;align-items:center}
+.hs-streak{font-family:var(--mono);font-size:.65rem;color:var(--gold)}
+.hs-pct{font-family:var(--mono);font-size:.82rem;font-weight:600}
+.hs-bg{height:3px;background:var(--surface3);border-radius:2px}
+.hs-fill{height:3px;border-radius:2px;transition:width .5s}
+.hs-meta{font-family:var(--mono);font-size:.6rem;color:var(--text3);margin-top:3px}
+
+/* Modal */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;z-index:999;backdrop-filter:blur(5px)}
+.overlay.on{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:24px;max-width:370px;width:92%;animation:mIn .18s ease}
+@keyframes mIn{from{opacity:0;transform:scale(.95) translateY(8px)}to{opacity:1;transform:none}}
+.mt{font-family:var(--display);font-size:.95rem;font-weight:700;margin-bottom:8px}
+.mb{font-size:.8rem;color:var(--text2);line-height:1.6;margin-bottom:20px}
+.mbtns{display:flex;gap:8px;justify-content:flex-end}
+
+/* Toast */
+.toast{position:fixed;bottom:22px;right:22px;padding:10px 16px;border-radius:9px;font-size:.77rem;font-weight:600;font-family:var(--mono);opacity:0;transform:translateY(16px);transition:all .22s;z-index:9999;border:1px solid}
+.toast.on{opacity:1;transform:none}
+.toast.ok{background:rgba(52,211,153,.1);border-color:rgba(52,211,153,.35);color:var(--green)}
+.toast.err{background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.35);color:var(--red)}
+
+/* Empty */
+.empty{text-align:center;padding:52px 20px;color:var(--text3)}
+.ei{font-size:2.2rem;margin-bottom:10px;opacity:.45}
+.empty p{font-size:.8rem;max-width:260px;margin:0 auto;line-height:1.7}
+
+/* Responsive */
+@media(max-width:700px){
+  .lnav{padding:14px 18px}
+  .mock-kpi{grid-template-columns:1fr 1fr}
+  .mr-boxes{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════
+     SCREEN 1: LANDING PAGE
+══════════════════════════════════════════════ -->
+<div id="screen-landing">
+
+  <nav class="lnav">
+    <div class="lnav-logo">HabitOS</div>
+    <div style="display:flex;gap:10px">
+      <button class="lbtn lbtn-ghost" onclick="openApp()">Open App</button>
+      <button class="lbtn lbtn-primary" onclick="openApp()">🚀 Start Free</button>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-badge">✦ Free · No signup · Works offline</div>
+    <h1 class="hero-title">Turn your life<br>into a <span class="hl">game</span></h1>
+    <p class="hero-sub">Track your daily habits, watch your streaks grow, and become the best version of yourself — one checkbox at a time.</p>
+    <div class="hero-actions">
+      <button class="lbtn lbtn-primary lbtn-big" onclick="openApp()">🚀 Start Tracking Free</button>
+    </div>
+    <div class="hero-note">
+      <span class="ok">✓</span> Works offline &nbsp;·&nbsp;
+      <span class="ok">✓</span> Data stays on your device &nbsp;·&nbsp;
+      <span class="ok">✓</span> No account needed
+    </div>
+
+    <!-- Mockup -->
+    <div class="mockup" style="margin-top:52px">
+      <div class="mock-bar">
+        <div class="mdot" style="background:#ff5f57"></div>
+        <div class="mdot" style="background:#febc2e"></div>
+        <div class="mdot" style="background:#28c840"></div>
+        <div class="mock-title">HabitOS — Daily System</div>
+      </div>
+      <div class="mock-body">
+        <div class="mock-kpi">
+          <div class="mk"><div class="mk-v" style="color:#34d399">7/9</div><div class="mk-l">Today</div></div>
+          <div class="mk"><div class="mk-v" style="color:#818cf8">82%</div><div class="mk-l">This Week</div></div>
+          <div class="mk"><div class="mk-v" style="color:#fbbf24">14d</div><div class="mk-l">Best Streak</div></div>
+          <div class="mk"><div class="mk-v" style="color:#f472b6">76%</div><div class="mk-l">All Time</div></div>
+        </div>
+        <div class="mock-row"><div class="mr-dot" style="background:#34d399"></div><div class="mr-name">☀️ Wake up at 5:00 AM</div><div class="mr-boxes"><div class="mrb y">✓</div><div class="mrb y">✓</div><div class="mrb y">✓</div><div class="mrb n"></div><div class="mrb y">✓</div><div class="mrb y">✓</div><div class="mrb y">✓</div></div><div class="mr-pct">86%</div></div>
+        <div class="mock-row"><div class="mr-dot" style="background:#818cf8"></div><div class="mr-name">💪 Gym</div><div class="mr-boxes"><div class="mrb y">✓</div><div class="mrb y">✓</div><div class="mrb n"></div><div class="mrb y">✓</div><div class="mrb y">✓</div><div class="mrb n"></div><div class="mrb y">✓</div></div><div class="mr-pct">71%</div></div>
+        <div class="mock-row"><div class="mr-dot" style="background:#fbbf24"></div><div class="mr-name">📚 Reading / Learning</div><div class="mr-boxes"><div class="mrb y">✓</div><div class="mrb y">✓</div><div class="mrb y">✓</div><div class="mrb y">✓</div><div class="mrb y">✓</div><div class="mrb y">✓</div><div class="mrb y">✓</div></div><div class="mr-pct">100%</div></div>
+        <div class="mock-row"><div class="mr-dot" style="background:#f472b6"></div><div class="mr-name">🚫 No Alcohol</div><div class="mr-boxes"><div class="mrb y">✓</div><div class="mrb n"></div><div class="mrb y">✓</div><div class="mrb y">✓</div><div class="mrb y">✓</div><div class="mrb y">✓</div><div class="mrb y">✓</div></div><div class="mr-pct">86%</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="features">
+    <div class="sec-tag">Features</div>
+    <h2 class="sec-title">Everything you need.<br>Nothing you don't.</h2>
+    <p class="sec-sub">Simple, powerful, and completely private. Your data never leaves your device.</p>
+    <div class="feat-grid">
+      <div class="feat"><div class="feat-ico">📅</div><div class="feat-name">Full Week View</div><div class="feat-desc">Track all 7 days including weekends. Navigate between past weeks anytime.</div></div>
+      <div class="feat"><div class="feat-ico">📈</div><div class="feat-name">Live Statistics</div><div class="feat-desc">Completion rates, best streaks, weekly charts — all updated instantly.</div></div>
+      <div class="feat"><div class="feat-ico">🔒</div><div class="feat-name">100% Private</div><div class="feat-desc">No account, no server, no cloud. All data saved locally on your device.</div></div>
+      <div class="feat"><div class="feat-ico">📊</div><div class="feat-name">Export to Excel</div><div class="feat-desc">Download your full history as CSV — opens in Excel or Google Sheets.</div></div>
+      <div class="feat"><div class="feat-ico">🎨</div><div class="feat-name">Custom Habits</div><div class="feat-desc">Name, emoji, and color for each habit. Build your personal system.</div></div>
+      <div class="feat"><div class="feat-ico">⚡</div><div class="feat-name">Works Offline</div><div class="feat-desc">No internet needed. Double-click the file, and it just works. Always.</div></div>
+    </div>
+  </section>
+
+  <section class="howto">
+    <div class="sec-tag">How it works</div>
+    <h2 class="sec-title" style="text-align:center;margin-bottom:36px">Ready in 30 seconds</h2>
+    <div class="steps">
+      <div class="step"><div class="step-n">1</div><div><div class="step-title">Click "Start Tracking Free"</div><div class="step-desc">The app opens instantly — no download, no install, no signup.</div></div></div>
+      <div class="step"><div class="step-n">2</div><div><div class="step-title">Add your habits</div><div class="step-desc">Go to "My Habits", type a name, pick an emoji and color, click Add.</div></div></div>
+      <div class="step"><div class="step-n">3</div><div><div class="step-title">Check off your day</div><div class="step-desc">Each day, open the Tracker and tick each habit you completed.</div></div></div>
+      <div class="step"><div class="step-n">4</div><div><div class="step-title">Watch your progress</div><div class="step-desc">See streaks, completion rates, and charts grow in the Statistics tab.</div></div></div>
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="cta-box">
+      <h2 class="cta-title">Ready to level up<br>your life?</h2>
+      <p class="cta-sub">Free forever. No account. No ads. Just you and your habits.</p>
+      <button class="lbtn lbtn-primary lbtn-big" onclick="openApp()">🚀 Open HabitOS</button>
+    </div>
+  </section>
+
+  <footer class="lfooter">
+    <div class="lfooter-logo">HabitOS</div>
+    <div class="lfooter-note">// free · private by design · works offline</div>
+  </footer>
+
+</div><!-- /screen-landing -->
+
+
+<!-- ══════════════════════════════════════════════
+     SCREEN 2: THE APP
+══════════════════════════════════════════════ -->
+<div id="screen-app">
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="logo-area">
+      <div class="logo-word">HabitOS</div>
+      <div class="logo-tag">Daily System</div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Menu</div>
+      <button class="nav-btn active" onclick="goto('tracker',this)"><span class="n-icon">📅</span>Tracker</button>
+      <button class="nav-btn" onclick="goto('habits',this)"><span class="n-icon">✏️</span>My Habits</button>
+      <button class="nav-btn" onclick="goto('stats',this)"><span class="n-icon">📈</span>Statistics</button>
+      <button class="nav-btn" onclick="backToLanding()" style="margin-top:8px"><span class="n-icon">🏠</span>Home</button>
+    </div>
+    <div class="sidebar-bottom">
+      <button class="sb-btn" onclick="exportCSV()">📊 Export to Excel</button>
+      <button class="sb-btn" onclick="saveJSON()">💾 Save Backup</button>
+      <button class="sb-btn" onclick="document.getElementById('loadIn').click()">📂 Load Backup</button>
+      <input type="file" id="loadIn" accept=".json" style="display:none" onchange="loadJSON(event)">
+    </div>
+  </aside>
+
+  <div class="main-area">
+    <div class="topbar">
+      <div>
+        <span class="page-name" id="pname">Tracker</span>
+        <span class="page-sub" id="psub"></span>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost" onclick="exportCSV()">📊 Export</button>
+        <button class="btn btn-accent" onclick="goto('habits',document.querySelectorAll('.nav-btn')[1]);setTimeout(()=>document.getElementById('hni').focus(),100)">+ Add Habit</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- TRACKER -->
+      <div class="view active" id="vt">
+        <div class="tracker-head">
+          <div id="mTitle" class="month-title">—</div>
+          <div class="week-nav">
+            <button class="wk-arrow" onclick="shiftWk(-1)">‹</button>
+            <div class="wk-label" id="wkLabel">—</div>
+            <button class="wk-arrow" onclick="shiftWk(1)">›</button>
+            <button class="btn btn-outline" style="padding:5px 9px;font-size:.7rem" onclick="resetWk()">Today</button>
+          </div>
+        </div>
+        <div class="kpi-row" id="kpiRow"></div>
+        <div class="tcard" id="tcard"></div>
+      </div>
+
+      <!-- HABITS -->
+      <div class="view" id="vh">
+        <div class="add-card">
+          <div class="add-card-title">// New Habit</div>
+          <div class="form-row">
+            <div class="fg"><div class="fl2">Habit Name</div><input class="inp inp-n" id="hni" placeholder="e.g. Wake up at 5:00 AM" maxlength="40"></div>
+            <div class="fg"><div class="fl2">Emoji</div><input class="inp inp-e" id="hei" placeholder="☀️" maxlength="2"></div>
+            <div class="fg">
+              <div class="fl2">Color</div>
+              <div class="swatches" id="swatches">
+                <div class="sw sel" data-c="#34d399" style="background:#34d399" onclick="pickC(this)"></div>
+                <div class="sw" data-c="#818cf8" style="background:#818cf8" onclick="pickC(this)"></div>
+                <div class="sw" data-c="#f472b6" style="background:#f472b6" onclick="pickC(this)"></div>
+                <div class="sw" data-c="#fbbf24" style="background:#fbbf24" onclick="pickC(this)"></div>
+                <div class="sw" data-c="#f87171" style="background:#f87171" onclick="pickC(this)"></div>
+                <div class="sw" data-c="#06b6d4" style="background:#06b6d4" onclick="pickC(this)"></div>
+                <div class="sw" data-c="#fb923c" style="background:#fb923c" onclick="pickC(this)"></div>
+              </div>
+            </div>
+            <div class="fg"><div class="fl2">&nbsp;</div><button class="btn btn-accent" onclick="addHabit()">Add Habit</button></div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div style="font-family:var(--display);font-size:1rem;font-weight:700">Active Habits <span id="hcount" style="color:var(--text3);font-size:0.78rem;font-weight:400"></span></div>
+        </div>
+        <div class="h-list" id="hlist"></div>
+      </div>
+
+      <!-- STATS -->
+      <div class="view" id="vs">
+        <div class="bigs" id="bigs"></div>
+        <div class="chart-box" id="wchart"></div>
+        <div class="chart-box"><div class="cbox-t">Per Habit Breakdown</div><div class="hsl" id="hsl"></div></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="delOv">
+  <div class="modal">
+    <div class="mt">Remove Habit</div>
+    <div class="mb" id="delTxt"></div>
+    <div class="mbtns">
+      <button class="btn btn-ghost" onclick="closeM()">Cancel</button>
+      <button class="btn btn-danger" onclick="doDel()">Remove</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /screen-app -->
+
+<div class="toast" id="t"></div>
+
+<script>
+// ── SCREEN SWITCHING ──────────────────────────────
+function openApp(){
+  document.getElementById('screen-landing').style.display='none';
+  document.getElementById('screen-app').style.display='block';
+  document.getElementById('screen-app').classList.add('screen-fade');
+  localStorage.setItem('habitOS_hasUsed','1');
+  initApp();
+}
+
+// Auto-skip landing page if already used the app before
+window.addEventListener('DOMContentLoaded',()=>{
+  if(localStorage.getItem('habitOS_hasUsed')==='1'){
+    document.getElementById('screen-landing').style.display='none';
+    document.getElementById('screen-app').style.display='block';
+    initApp();
+  }
+});
+function backToLanding(){
+  document.getElementById('screen-app').style.display='none';
+  document.getElementById('screen-landing').style.display='block';
+  window.scrollTo(0,0);
+}
+
+// ── APP STATE ─────────────────────────────────────
+let S={habits:[],log:{}};
+let wkOff=0, pendDel=null, selC='#34d399', appInited=false;
+const KEY='habitOS_v3';
+const DAY_NAMES=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MONTHS_S=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function initApp(){
+  if(appInited) return;
+  appInited=true;
+  try{const r=localStorage.getItem(KEY);if(r)S=JSON.parse(r);}catch(e){}
+  const now=new Date();
+  document.getElementById('psub').textContent=`${DAY_NAMES[(now.getDay()+6)%7]}, ${now.getDate()} ${MONTHS_S[now.getMonth()]} ${now.getFullYear()}`;
+  render();
+}
+
+const save=()=>localStorage.setItem(KEY,JSON.stringify(S));
+const fmt=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const today=()=>fmt(new Date());
+const isFut=ds=>{
+  const now=new Date();
+  const dow=now.getDay();
+  const sun=new Date(now);
+  sun.setDate(now.getDate()+(dow===0?0:7-dow));
+  return ds>fmt(sun);
+};
+const isTdy=ds=>ds===today();
+
+function getWeek(off){
+  const now=new Date();
+  const dow=now.getDay();
+  const mon=new Date(now);
+  mon.setDate(now.getDate()-(dow===0?6:dow-1)+off*7);
+  mon.setHours(0,0,0,0);
+  return Array.from({length:7},(_,i)=>{const d=new Date(mon);d.setDate(mon.getDate()+i);return d;});
+}
+
+function render(){renderTracker();renderHabits();}
+
+// ── TRACKER ───────────────────────────────────────
+function renderTracker(){
+  const days=getWeek(wkOff);
+  const td=today();
+  const mid=days[3];
+  document.getElementById('mTitle').innerHTML=`${MONTHS[mid.getMonth()]} <span class="yr">${mid.getFullYear()}</span>`;
+  document.getElementById('wkLabel').textContent=`${days[0].getDate()} ${MONTHS_S[days[0].getMonth()]} – ${days[6].getDate()} ${MONTHS_S[days[6].getMonth()]} ${days[6].getFullYear()}`;
+
+  const kpi=document.getElementById('kpiRow');
+  if(!S.habits.length){kpi.innerHTML=''}
+  else{
+    const todayDone=S.habits.filter(h=>S.log[td]?.[h.id]).length;
+    let w7=0,wt=0;
+    days.forEach(d=>{const ds=fmt(d);if(!isFut(ds))S.habits.forEach(h=>{wt++;if(S.log[ds]?.[h.id])w7++;});});
+    const wPct=wt?Math.round(w7/wt*100):0;
+    let bStrk=0;
+    S.habits.forEach(h=>{let s=0,mx=0;Object.keys(S.log).filter(d=>!isFut(d)).sort().forEach(d=>{S.log[d]?.[h.id]?(s++,mx=Math.max(mx,s)):(s=0);});bStrk=Math.max(bStrk,mx);});
+    let aD=0,aT=0;
+    Object.keys(S.log).filter(d=>!isFut(d)).forEach(d=>S.habits.forEach(h=>{aT++;if(S.log[d]?.[h.id])aD++;}));
+    const aPct=aT?Math.round(aD/aT*100):0;
+    kpi.innerHTML=`
+      <div class="kpi"><div class="kpi-ico">☀️</div><div><div class="kpi-v c-green">${todayDone}/${S.habits.length}</div><div class="kpi-l">Today</div></div></div>
+      <div class="kpi"><div class="kpi-ico">📅</div><div><div class="kpi-v c-purple">${wPct}%</div><div class="kpi-l">This Week</div></div></div>
+      <div class="kpi"><div class="kpi-ico">🔥</div><div><div class="kpi-v c-gold">${bStrk}d</div><div class="kpi-l">Best Streak</div></div></div>
+      <div class="kpi"><div class="kpi-ico">🎯</div><div><div class="kpi-v c-pink">${aPct}%</div><div class="kpi-l">All Time</div></div></div>`;
+  }
+
+  const card=document.getElementById('tcard');
+  if(!S.habits.length){card.innerHTML=`<div class="empty"><div class="ei">🎯</div><p>No habits yet.<br>Go to <strong>My Habits</strong> and add your first one.</p></div>`;return;}
+
+  let h=`<table class="htable"><thead><tr><th class="h-col">MY HABITS</th>`;
+  days.forEach((d,i)=>{
+    const ds=fmt(d),isTd=isTdy(ds),isWk=i>=5;
+    h+=`<th class="${isTd?'td-col':isWk?'wk-col':''}">${DAY_NAMES[i]}<span class="dn${isTd?' today':''}">${d.getDate()}</span></th>`;
+  });
+  h+=`<th style="font-family:var(--mono);font-size:.58rem;color:var(--text3);text-align:right;padding-right:14px">WEEK %</th></tr></thead><tbody>`;
+
+  S.habits.forEach(habit=>{
+    h+=`<tr><td class="hcell"><div class="hlabel"><div class="hdot" style="background:${habit.color}"></div><div class="hemo">${habit.emoji}</div><div class="hname">${habit.name}</div></div></td>`;
+    let wD=0,wT=0;
+    days.forEach((d,i)=>{
+      const ds=fmt(d),isTd=isTdy(ds),isWk=i>=5,fut=isFut(ds);
+      const done=S.log[ds]?.[habit.id];
+      if(!fut){wT++;if(done)wD++;}
+      h+=`<td class="${isTd?'td-col':isWk?'wk-col':''}"><button class="cb${fut?' cb-fut':done?' cb-done':''}" onclick="toggle('${habit.id}','${ds}')"></button></td>`;
+    });
+    const pct=wT?Math.round(wD/wT*100):0;
+    const pc=pct>=80?'var(--green)':pct>=50?'var(--gold)':'var(--red)';
+    h+=`<td class="pct-cell"><div class="pct-n" style="color:${pc}">${pct}%</div><div class="pct-bg"><div class="pct-fill" style="width:${pct}%;background:${pc}"></div></div></td></tr>`;
+  });
+
+  h+=`</tbody><tfoot>`;
+  [['Progress','fp',d=>{const dn=S.habits.filter(hb=>S.log[d]?.[hb.id]).length;return Math.round(dn/S.habits.length*100)+'%';}],
+   ['Done','fdc',d=>S.habits.filter(hb=>S.log[d]?.[hb.id]).length],
+   ['Not Done','fnd',d=>S.habits.length-S.habits.filter(hb=>S.log[d]?.[hb.id]).length]
+  ].forEach(([lbl,cls,fn])=>{
+    h+=`<tr><td class="fl">${lbl}</td>`;
+    days.forEach(d=>{const ds=fmt(d),fut=isFut(ds);h+=`<td class="${cls}">${fut?'–':fn(ds)}</td>`;});
+    h+=`<td></td></tr>`;
+  });
+  h+=`</tfoot></table><div class="minichart">`;
+  days.forEach((d,i)=>{
+    const ds=fmt(d),fut=isFut(ds),isWk=i>=5;
+    const pct=(!fut&&S.habits.length)?S.habits.filter(hb=>S.log[ds]?.[hb.id]).length/S.habits.length*100:0;
+    h+=`<div class="mbar" style="height:${fut?2:Math.max(pct,2)}%;background:${isWk?'rgba(129,140,248,.5)':'rgba(110,231,183,.45)'}"></div>`;
+  });
+  h+=`</div>`;
+  card.innerHTML=h;
+}
+
+function toggle(hid,ds){
+  if(isFut(ds))return;
+  if(!S.log[ds])S.log[ds]={};
+  S.log[ds][hid]=!S.log[ds][hid];
+  save();renderTracker();
+  if(document.getElementById('vs').classList.contains('active'))renderStats();
+}
+
+// ── HABITS ────────────────────────────────────────
+function addHabit(){
+  const name=document.getElementById('hni').value.trim();
+  if(!name){toast('Enter a habit name','err');return;}
+  S.habits.push({id:Date.now()+'',name,emoji:document.getElementById('hei').value.trim()||'✓',color:selC,createdAt:today()});
+  document.getElementById('hni').value='';document.getElementById('hei').value='';
+  save();render();toast('Habit added ✓');
+}
+function pickC(el){document.querySelectorAll('.sw').forEach(s=>s.classList.remove('sel'));el.classList.add('sel');selC=el.dataset.c;}
+
+function renderHabits(){
+  const list=document.getElementById('hlist');
+  document.getElementById('hcount').textContent=`— ${S.habits.length}`;
+  if(!S.habits.length){list.innerHTML=`<div class="empty"><div class="ei">📋</div><p>No habits yet. Add your first habit above.</p></div>`;return;}
+  list.innerHTML=S.habits.map(h=>`
+    <div class="hrow">
+      <div class="hrow-dot" style="background:${h.color}"></div>
+      <div class="hrow-emo">${h.emoji}</div>
+      <div class="hrow-n">${h.name}</div>
+      <div class="hrow-dt">since ${h.createdAt||'–'}</div>
+      <button class="btn btn-danger" style="padding:4px 10px;font-size:.7rem" onclick="openDel('${h.id}')">Remove</button>
+    </div>`).join('');
+}
+
+// ── DELETE ────────────────────────────────────────
+function openDel(id){pendDel=id;const h=S.habits.find(x=>x.id===id);document.getElementById('delTxt').textContent=`Remove "${h?.name}"? All tracking data will be permanently erased.`;document.getElementById('delOv').classList.add('on');}
+function closeM(){pendDel=null;document.getElementById('delOv').classList.remove('on');}
+function doDel(){S.habits=S.habits.filter(h=>h.id!==pendDel);Object.keys(S.log).forEach(d=>{if(S.log[d])delete S.log[d][pendDel];});closeM();save();render();toast('Removed','err');}
+
+// ── STATS ─────────────────────────────────────────
+function renderStats(){
+  const allDates=Object.keys(S.log).filter(d=>!isFut(d)).sort();
+  let aD=0,aT=0,bStrk=0;
+  S.habits.forEach(h=>{let s=0,mx=0;allDates.forEach(d=>{aT++;if(S.log[d]?.[h.id]){aD++;s++;mx=Math.max(mx,s);}else s=0;});bStrk=Math.max(bStrk,mx);});
+  const aPct=aT?Math.round(aD/aT*100):0;
+  const days7=getWeek(0);let w7=0,wt=0;
+  days7.forEach(d=>{const ds=fmt(d);if(!isFut(ds))S.habits.forEach(h=>{wt++;if(S.log[ds]?.[h.id])w7++;});});
+  const wPct=wt?Math.round(w7/wt*100):0;
+  document.getElementById('bigs').innerHTML=`
+    <div class="big-stat"><div class="big-v" style="color:var(--green)">${S.habits.length}</div><div class="big-l">Habits</div></div>
+    <div class="big-stat"><div class="big-v" style="color:var(--accent2)">${aPct}%</div><div class="big-l">All-Time Rate</div></div>
+    <div class="big-stat"><div class="big-v" style="color:var(--accent)">${wPct}%</div><div class="big-l">This Week</div></div>
+    <div class="big-stat"><div class="big-v" style="color:var(--gold)">${bStrk}d</div><div class="big-l">Best Streak</div></div>`;
+  const barsH=days7.map((d,i)=>{
+    const ds=fmt(d),fut=isFut(ds),isWk=i>=5;
+    const pct=(!fut&&S.habits.length)?Math.round(S.habits.filter(h=>S.log[ds]?.[h.id]).length/S.habits.length*100):0;
+    const col=isTdy(ds)?'var(--accent)':isWk?'var(--accent2)':'rgba(110,231,183,.6)';
+    return `<div class="bcol"><div class="bval">${fut?'':pct+'%'}</div><div class="bbg"><div class="bfill" style="height:${fut?1:Math.max(pct,1)}%;background:${col}"></div></div><div class="blabel" style="${isTdy(ds)?'color:var(--accent)':''}">${DAY_NAMES[i]}</div></div>`;
+  }).join('');
+  document.getElementById('wchart').innerHTML=`<div class="cbox-t">This Week — Daily Completion</div><div class="bars">${barsH}</div>`;
+  const hslH=S.habits.map(h=>{
+    const sd=allDates.filter(d=>d>=h.createdAt);let done=0,s=0,mx=0;
+    sd.forEach(d=>{S.log[d]?.[h.id]?(done++,s++,mx=Math.max(mx,s)):(s=0);});
+    const pct=sd.length?Math.round(done/sd.length*100):0;
+    const pc=pct>=80?'var(--green)':pct>=50?'var(--gold)':'var(--red)';
+    return `<div class="hs"><div class="hs-top"><div class="hs-name"><div style="width:8px;height:8px;border-radius:50%;background:${h.color}"></div>${h.emoji} ${h.name}</div><div class="hs-right"><div class="hs-streak">🔥 ${mx}d</div><div class="hs-pct" style="color:${pc}">${pct}%</div></div></div><div class="hs-bg"><div class="hs-fill" style="width:${pct}%;background:${pc}"></div></div><div class="hs-meta">${done} / ${sd.length} days</div></div>`;
+  }).join('')||`<div class="empty"><div class="ei">📊</div><p>Start checking habits to see stats here.</p></div>`;
+  document.getElementById('hsl').innerHTML=hslH;
+}
+
+// ── NAV ───────────────────────────────────────────
+function goto(id,btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('v'+id[0]).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  document.getElementById('pname').textContent={tracker:'Tracker',habits:'My Habits',stats:'Statistics'}[id];
+  if(id==='stats')renderStats();
+}
+function shiftWk(d){wkOff+=d;renderTracker();}
+function resetWk(){wkOff=0;renderTracker();}
+
+// ── EXPORT ────────────────────────────────────────
+function exportCSV(){
+  if(!S.habits.length){toast('No habits','err');return;}
+  const dates=[...new Set([...Object.keys(S.log),...getWeek(0).map(fmt)])].filter(d=>!isFut(d)).sort();
+  if(!dates.length){toast('No data yet','err');return;}
+  let c='Date,Day,'+S.habits.map(h=>h.name).join(',')+',Done,Total,%\n';
+  dates.forEach(d=>{
+    const dn=DAY_NAMES[(new Date(d).getDay()+6)%7];let done=0;const row=[d,dn];
+    S.habits.forEach(h=>{const v=S.log[d]?.[h.id]?1:0;done+=v;row.push(v);});
+    row.push(done,S.habits.length,Math.round(done/S.habits.length*100)+'%');
+    c+=row.join(',')+'\n';
+  });
+  c+='\n\nHabit Summary\nHabit,Done,Total,Rate,Best Streak\n';
+  S.habits.forEach(h=>{
+    const sd=dates.filter(d=>d>=h.createdAt);let done=0,s=0,mx=0;
+    sd.forEach(d=>{S.log[d]?.[h.id]?(done++,s++,mx=Math.max(mx,s)):(s=0);});
+    c+=`"${h.name}",${done},${sd.length},${sd.length?Math.round(done/sd.length*100):0}%,${mx}\n`;
+  });
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([c],{type:'text/csv'}));
+  a.download=`HabitOS_${today()}.csv`;a.click();toast('Exported ✓');
+}
+function saveJSON(){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,2)],{type:'application/json'}));
+  a.download=`HabitOS_backup_${today()}.json`;a.click();toast('Backup saved ✓');
+}
+function loadJSON(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{try{S=JSON.parse(ev.target.result);save();render();toast('Loaded ✓');}catch{toast('Invalid file','err');}};
+  r.readAsText(f);e.target.value='';
+}
+
+// ── TOAST ─────────────────────────────────────────
+function toast(msg,type='ok'){
+  const t=document.getElementById('t');
+  t.textContent=msg;t.className='toast '+type+' on';
+  clearTimeout(t._tm);t._tm=setTimeout(()=>t.classList.remove('on'),2500);
+}
+</script>
+</body>
+</html>
