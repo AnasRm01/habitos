@@ -8,15 +8,14 @@ on:
 jobs:
   build-windows-exe:
     runs-on: windows-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Download Inno Setup
-        run: |
-          curl -L -o innosetup.exe https://jrsoftware.org/download.php/is.exe
-          Start-Process -Wait -FilePath innosetup.exe -ArgumentList '/VERYSILENT /SUPPRESSMSGBOXES /NORESTART'
+      - name: Install Inno Setup via Chocolatey
+        run: choco install innosetup --yes --no-progress
         shell: pwsh
 
       - name: Compile Windows installer
